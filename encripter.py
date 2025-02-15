@@ -2,17 +2,20 @@ from time import sleep
 from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
 from rich.progress import Progress, BarColumn, TextColumn, track, open as ropen
-from os import system, name, mkdir
-from os.path import isdir, dirname
+from os import system, name, mkdir, rename
+from os.path import isdir, dirname, getctime, isfile
 from hashlib import sha3_256
 from random import randint
+from datetime import datetime
 
 # Introduccion al programa no hace nada solo es estetico
 def Introduction():
-    if name == "nt":
-        system("cls")
-    else:
-        system("clear")
+    def clear():
+        if name == "nt":
+            system("cls")
+        else:
+            system("clear")
+    clear()
 
     print("""██╗░░██╗░█████╗░░██████╗██╗░░██╗██╗██╗░░██╗██╗░░░██╗
 ██║░░██║██╔══██╗██╔════╝██║░░██║██║██║░██╔╝██║░░░██║
@@ -22,17 +25,22 @@ def Introduction():
 ╚═╝░░╚═╝░╚════╝░╚═════╝░╚═╝░░╚═╝╚═╝╚═╝░░╚═╝░╚═════╝░""")
     for i in track(range(10), description="Iniciando programa..."):
         sleep(0.05)
+    
+    logsDir = f"{dirname(__file__)}/Logs"
+    logsLast = f"{dirname(__file__)}/Logs/LogsLast.log"
+
+    # Crea el directorio de logs si no exite y guarda el ultimo archivo de logs
+    if not isdir(logsDir):
+        mkdir(logsDir)
+    if isfile(logsLast):
+        dateTime = datetime.fromtimestamp(getctime(logsLast)).strftime('%Y-%m-%d %H:%M:%S')
+        rename(logsLast, f"{logsDir}/Logs{dateTime}.log")
+
     #Limpia el archivo de logs
-    #Hacer algo para cambiar el nombre del ultimo lastlog para guardarlo
-    if not isdir(f"{dirname(__file__)}/Logs"):
-        mkdir(f"{dirname(__file__)}/Logs")
-    with open("Logs/LogsLast.log", "w+", encoding="UTF-8") as file:
+    with open(logsLast, "w+", encoding="UTF-8") as file:
         file.write("Comienzo Archivo Log\n\n")
     
-    if name == "nt":
-        system("cls")
-    else:
-        system("clear")
+    clear()
 
 # --------------------------------------------------------------------------------------------------------------
 
@@ -46,7 +54,7 @@ def sha256(text):
 def UpdateProgress(progress, task, step, log):
     if task != None:
         progress.update(task, advance=step)
-    with open("Logs/LogsLast.log", "a", encoding="UTF-8") as file:
+    with open(f"{dirname(__file__)}/Logs/LogsLast.log", "a", encoding="UTF-8") as file:
         file.write(log + "\n")
     if verbose == True:
         progress.console.log(log)
@@ -72,7 +80,7 @@ def ProcessInputFile(filePath, chunkLevel):
             processedContent.append(fileContent[i:i+chunkLevel])
             UpdateProgress(progress, actualTask, 1, f"[yellow][CHUNKS] [green]Procesando chunk [bold][purple]{i//chunkLevel+1}")
 
-        UpdateProgress(progress, None, 1, f"[yellow][CHUNKS] [green]Cantidad chunks procesados [white]{len(processedContent)+1}")
+        UpdateProgress(progress, None, 1, f"[yellow][CHUNKS] [green]Cantidad chunks procesados [white]{len(processedContent)}")
         return processedContent
 
 # Funcion para procesar la semilla del archivo que se usara
