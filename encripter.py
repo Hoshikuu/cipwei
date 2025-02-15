@@ -1,13 +1,13 @@
-from time import sleep
+from time import sleep, time
 from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
-from rich.progress import Progress, BarColumn, TextColumn, track, open as ropen
-from rich.pretty import pprint
-from os import system, name, mkdir, rename
+from rich.progress import Progress, BarColumn, TextColumn, open as ropen
+from os import mkdir, rename
 from os.path import isdir, dirname, getctime, isfile
 from hashlib import sha3_256
 from random import randint
 from datetime import datetime
+from re import sub
 
 # Funcion para actualizar la barra uso Global
 def UpdateProgress(progress, task, step, log, logIt):
@@ -15,7 +15,7 @@ def UpdateProgress(progress, task, step, log, logIt):
         progress.update(task, advance=step)
     if logIt == True:
         with open(f"{dirname(__file__)}/Logs/LogsLast.log", "a", encoding="UTF-8") as file:
-            file.write(log + "\n")
+            file.write(f"[{round((time() - start), 3):07.3f}] {sub(r'\[([a-z]+)\]', '', log)}\n")
     if verbose == True:
         progress.console.log(log)
 
@@ -28,7 +28,7 @@ def sha256(text):
 # Introduccion al programa no hace nada solo es estetico
 def Introduction():
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
-        actualTask = progress.add_task("[red]Iniciando...", total=5)
+        actualTask = progress.add_task("[red]Iniciando...", total=6)
 
         logo = """
 ██╗░░██╗░█████╗░░██████╗██╗░░██╗██╗██╗░░██╗██╗░░░██╗
@@ -51,23 +51,28 @@ def Introduction():
         if not isdir(logsDir):
             mkdir(logsDir)
             UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Creando Directorio de logs", False)
+        else:
+            UpdateProgress(progress, actualTask, 1, "", False)
         if isfile(logsLast):
             dateTime = datetime.fromtimestamp(getctime(logsLast)).strftime("%Y-%m-%d %H:%M:%S")
             rename(logsLast, f"{logsDir}/Logs{dateTime}.log")
             UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Guardando el archivo de logs", False)
+        else:
+            UpdateProgress(progress, actualTask, 1, "", False)
 
         #Limpia el archivo de logs
         with open(logsLast, "w+", encoding="UTF-8") as file:
             file.write(f"{logo}\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n\n")
-            UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Creando Fichero de logs", True)
+        UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Creando Fichero de logs", True)
         
-        UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Terminando", False)
+        UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Terminando", True)
 
 # Funcion para leer los datos del archivo de origen
 def ProcessInputFile(filePath, chunkLevel):
-    fileContent = None
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         sleep(pauseTime)
+
+        fileContent = None
 
         # Lee el archivo con una barra de carga
         with ropen(filePath, "r", encoding="UTF-8", transient=False) as file:
@@ -133,7 +138,7 @@ def CiperFile(content, seed, seededHashedMasterKey, chunkLevel):
                 seg = seg + char
             result = result + seg
             segments.append(seg)
-            UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando combinación [purple]{seg}", True)
+            UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando combinación [purple]{repr(seg)[1:-1]}", True)
 
             actualKey = sha256(seg)[seed:seed+chunkLevel]
             UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando nueva llave [purple]{actualKey}", False)
@@ -144,7 +149,7 @@ def GenerateChecksum(segments):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         sleep(pauseTime)
         
-        actualTask = progress.add_task("[red]Calculando checksum...", total=(len(segments)+1))
+        actualTask = progress.add_task("[red]Calculando Checksum...", total=(len(segments)+1))
         
         shaSeg = ""
 
@@ -173,6 +178,7 @@ if __name__ == "__main__":
     # Inicial Variables to Set
     console = Console()
     actualTask = None
+    start = time()
 
     # Configuration Variables
     pauseTime = 0.5
