@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
     # Configuration Variables
     pauseTime = 0.5
-    verbose = True
+    verbose = False
 
     Introduction()
 
