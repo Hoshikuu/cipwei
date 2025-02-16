@@ -8,6 +8,7 @@ from hashlib import sha3_256
 from random import randint
 from datetime import datetime
 from re import sub
+from getpass import getpass
 
 # Funcion para actualizar la barra uso Global
 def UpdateProgress(progress, task, step, log, logIt):
@@ -196,7 +197,7 @@ if __name__ == "__main__":
             break
         print("Cantidad introducida no entra al rango de seguridad permitida de momento")
 
-    masterKey = Prompt.ask("Introduce la clave de cifrado")
+    masterKey = getpass("Introduce la clave de cifrado: ")
     # masterKey = "secret"
     
     # dstPath = Prompt.ask("Introduce el archivo de destino")
