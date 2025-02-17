@@ -157,7 +157,7 @@ def GenerateChecksum(segments):
         for seg in segments:
             hash = sha256(seg)
             shaSeg = shaSeg + hash
-            UpdateProgress(progress, actualTask, 1, f"[yellow][CHECKSUM] [green]Calculando chekcsum [purple]{hash}", True)
+            UpdateProgress(progress, actualTask, 1, f"[yellow][CHECKSUM] [green]Calculando checksum [purple]{hash}", True)
 
         checksum = sha256(shaSeg)
         UpdateProgress(progress, actualTask, 1, f"[yellow][CHECKSUM] [green]Checksum final [purple]{checksum}", True)
