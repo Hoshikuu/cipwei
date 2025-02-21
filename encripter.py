@@ -3,19 +3,20 @@ from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
 from rich.progress import Progress, BarColumn, TextColumn, open as ropen
 from os import mkdir, rename
-from os.path import isdir, dirname, getmtime, isfile
+from os.path import isdir, getmtime, isfile
 from hashlib import sha3_256
 from random import randint
 from datetime import datetime
 from re import sub
 from getpass import getpass
+from pathlib import Path
 
 # Funcion para actualizar la barra uso Global
 def UpdateProgress(progress, task, step, log, logIt):
     if task != None:
         progress.update(task, advance=step)
     if logIt == True:
-        with open(f"{dirname(__file__)}\\Logs\\LogsLast.log", "a", encoding="UTF-8") as file:
+        with open((Path(__file__).parent / "Logs" / "LogsLast.log").as_posix(), "a", encoding="UTF-8") as file:
             file.write(f"[{round((time() - start), 3):07.3f}] {sub(r'\[([a-z]+)\]', '', log)}\n")
     if verbose == True:
         progress.console.log(log)
@@ -45,8 +46,8 @@ def Introduction():
 
         UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Estableciendo variables", False)
 
-        logsDir = f"{dirname(__file__)}\\Logs"
-        logsLast = f"{dirname(__file__)}\\Logs\\LogsLast.log"
+        logsDir = (Path(__file__).parent / "Logs").as_posix()
+        logsLast = (Path(__file__).parent / "Logs" / "LogsLast.log").as_posix()
 
         # Crea el directorio de logs si no exite y guarda el ultimo archivo de logs
         if not isdir(logsDir):
@@ -56,14 +57,14 @@ def Introduction():
             UpdateProgress(progress, actualTask, 1, "", False)
         if isfile(logsLast):
             dateTime = datetime.fromtimestamp(getmtime(logsLast)).strftime("%Y-%m-%d-%H-%M-%S")
-            rename(logsLast, f"{logsDir}\\Logs{dateTime}.log")
+            rename(logsLast, (Path(logsDir) / f"Logs{dateTime}.log").as_posix())
             UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Guardando el archivo de logs", False)
         else:
             UpdateProgress(progress, actualTask, 1, "", False)
 
         #Limpia el archivo de logs
         with open(logsLast, "w+", encoding="UTF-8") as file:
-            file.write(f"{logo}\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n\n")
+            file.write(f"{logo}\n{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}\n\n")
         UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Creando Fichero de logs", True)
         
         UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Terminando", True)
