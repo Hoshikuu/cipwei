@@ -100,13 +100,26 @@ def CheckChecksum(content, checksum):
             UpdateProgress(progress, actualTask, 1, f"[yellow][CHECKSUM] [green]Checksum comprobado [purple]NO ERROR", True)
         else:
             UpdateProgress(progress, actualTask, 1, f"[yellow][CHECKSUM] [green]Checksum comprobado [purple]ERROR Checksum invalido", True)
+            UpdateProgress(progress, actualTask, 0, "[yellow][CHECKSUM] [red]Error con la integridad del archivo, este archivo fue modificado!!", True)
+            print("           Error con la integridad del archivo, este archivo fue modificado!!")
+            exit()
 
+def CalculateSeed(hashedSeed):
+    with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
+        actualTask = progress.add_task("[red]Calculando Seed...", total=64)
 
-        
+        seed = ""
+        for i in range(64):
+            UpdateProgress(progress, actualTask, 1, f"[yellow][SEED] [green]Calculando Seed [purple]{i}", True)
+            if sha256(i) == hashedSeed:
+                seed = i
+                UpdateProgress(progress, actualTask, 64 - i, f"[yellow][SEED] [green]Seed Calculado [purple]{seed}", True)
+                break
+        return seed
 
 if __name__ == "__main__":
     
-        # Inicial Variables to Set
+    # Inicial Variables to Set
     console = Console()
     actualTask = None
     start = time()
@@ -134,9 +147,9 @@ if __name__ == "__main__":
 
     processedContent, hashedSeed, checksum = ReadFile(fileName, chunkLevel)
 
-    print(processedContent, hashedSeed, checksum)
-
     CheckChecksum(processedContent, checksum)
+
+    seed = CalculateSeed(hashedSeed)
 
 
 
