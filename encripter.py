@@ -1,3 +1,10 @@
+#                                                                    ---------------------------------
+#
+#                                                                       Script  creado por  Hoshiku
+#                                                                       https://github.com/Hoshikuu
+#
+#                                                                    ---------------------------------
+
 from time import sleep, time
 from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
@@ -115,6 +122,7 @@ def ProcessFileSeed(masterKey, chunkLevel):
 
         return seed, hashedSeed, seededHashedMasterKey
 
+# Encripta el archivo
 def CiperFile(content, seed, seededHashedMasterKey, chunkLevel):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         sleep(pauseTime)
@@ -147,6 +155,7 @@ def CiperFile(content, seed, seededHashedMasterKey, chunkLevel):
 
     return result, segments
 
+# Crea el checksum para la integridad del archivo
 def GenerateChecksum(segments):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         sleep(pauseTime)
@@ -164,6 +173,7 @@ def GenerateChecksum(segments):
         UpdateProgress(progress, actualTask, 1, f"[yellow][CHECKSUM] [green]Checksum final [purple]{checksum}", True)
         return checksum
 
+# Crea el archivo de destino donde se guarda el texto cifrado
 def MakeFile(seed, content, checksum, dstPath):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         sleep(pauseTime)
@@ -176,6 +186,7 @@ def MakeFile(seed, content, checksum, dstPath):
         UpdateProgress(progress, actualTask, 1, f"[yellow][MAKE] [green]Guardando archivo encriptado [purple]{dstPath}", True)
     return None
 
+# MAIN
 if __name__ == "__main__":
     # Inicial Variables to Set
     console = Console()

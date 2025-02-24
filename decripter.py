@@ -1,3 +1,10 @@
+#                                                                    ---------------------------------
+#
+#                                                                       Script  creado por  Hoshiku
+#                                                                       https://github.com/Hoshikuu
+#
+#                                                                    ---------------------------------
+
 from time import sleep, time
 from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
@@ -69,6 +76,7 @@ def Introduction():
         
         UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Terminando", True)
 
+# Lee el archivo de origen
 def ReadFile(filePath, chunkLevel):
     with ropen(filePath, "r", encoding="UTF-8") as file:
         fileContent = file.read()
@@ -82,9 +90,9 @@ def ReadFile(filePath, chunkLevel):
 
         for i in range(0, len(content), chunkLevel):
             processedContent.append(content[i:i+chunkLevel])
-
     return processedContent, hashedSeed, checksum
 
+# Comprueba la integridad del archivo encriptado si se ha modificado
 def CheckChecksum(content, checksum):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         actualTask = progress.add_task("[red]Comprobando Checksum...", total=len(content) + 1)
@@ -102,8 +110,10 @@ def CheckChecksum(content, checksum):
             UpdateProgress(progress, actualTask, 1, f"[yellow][CHECKSUM] [green]Checksum comprobado [purple]ERROR Checksum invalido", True)
             UpdateProgress(progress, actualTask, 0, "[yellow][CHECKSUM] [red]Error con la integridad del archivo, este archivo fue modificado!!", True)
             print("           Error con la integridad del archivo, este archivo fue modificado!!")
+            # Termina el programa si no falla en la integridad del archivo
             exit()
 
+# Calcula la semilla del srchivo
 def CalculateSeed(hashedSeed, masterKey, chunkLevel):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         actualTask = progress.add_task("[red]Calculando Seed...", total=64)
@@ -121,6 +131,7 @@ def CalculateSeed(hashedSeed, masterKey, chunkLevel):
         seededHashedMasterKey = hashedMasterkey[seed:seed+chunkLevel]
         return seed, seededHashedMasterKey
 
+# Desencripta el archivo
 def DecriptFile(content, seed, chunkLevel, seededHashedMasterKey):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         actualTask = progress.add_task("[red]Desencriptando Archivo...", total=(len(content)*2))
@@ -147,7 +158,8 @@ def DecriptFile(content, seed, chunkLevel, seededHashedMasterKey):
             actualKey = sha256(chunk)[seed:seed+chunkLevel]
             UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando nueva llave [purple]{actualKey}", True)
         return result
-    
+
+# Crea el archivo de destino donde se guardara el resultado
 def MakeFile(content, dstPath):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         sleep(pauseTime)
@@ -160,6 +172,7 @@ def MakeFile(content, dstPath):
         UpdateProgress(progress, actualTask, 1, f"[yellow][MAKE] [green]Guardando archivo Desencriptado [purple]{dstPath}", True)
     return None
 
+# MAIN
 if __name__ == "__main__":
     
     # Inicial Variables to Set
@@ -172,20 +185,24 @@ if __name__ == "__main__":
     verbose = True if Prompt.ask("Quieres activar verbose?", choices=["s", "n"]) == "s" else False
 
     # Settings Variables
-    fileName = Prompt.ask("Introduce la ruta del archivo que quieres encriptar")
+
     # fileName = "test.wei"
+    fileName = Prompt.ask("Introduce la ruta del archivo que quieres encriptar")
+
+    # dstPath = Prompt.ask("Introduce el archivo de destino")
+    # dstPath = "Cifradowei.wei"
     dstPath = fileName.split(".")[0] + "Decripted.txt"
 
+    # chunkLevel = 16
     while True:
         chunkLevel = IntPrompt.ask("Introduce la cantitdad de bytes que se usara por chunk [1 - 64]",default=16)
         if chunkLevel >= 1 and chunkLevel <= 64:
             break
         print("Cantidad introducida no entra al rango de seguridad permitida de momento")
 
-    # chunkLevel = 16
-
-    masterKey = getpass("Introduce la clave de cifrado: ")
     # masterKey = "secret"
+    masterKey = getpass("Introduce la clave de cifrado: ")
+   
 
     # Start
 
