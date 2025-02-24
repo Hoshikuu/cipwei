@@ -23,7 +23,7 @@ def UpdateProgress(progress, task, step, log, logIt):
     if task != None:
         progress.update(task, advance=step)
     if logIt == True:
-        with open((Path(__file__).parent / "Logs" / "LogsLast.log").as_posix(), "a", encoding="UTF-8") as file:
+        with open((Path(__file__).parent / "Logs" / "encripter" / "LogsLast.log").as_posix(), "a", encoding="UTF-8") as file:
             file.write(f"[{round((time() - start), 3):07.3f}] {sub(r'\[([a-z]+)\]', '', log)}\n")
     if verbose == True:
         progress.console.log(log)
@@ -53,10 +53,14 @@ def Introduction():
 
         UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Estableciendo variables", False)
 
-        logsDir = (Path(__file__).parent / "Logs").as_posix()
-        logsLast = (Path(__file__).parent / "Logs" / "LogsLast.log").as_posix()
+        parentLogDir = (Path(__file__).parent / "Logs").as_posix()
+        logsDir = (Path(__file__).parent / "Logs" / "encripter").as_posix()
+        logsLast = (Path(__file__).parent / "Logs" / "encripter" / "LogsLast.log").as_posix()
 
         # Crea el directorio de logs si no exite y guarda el ultimo archivo de logs
+        if not isdir(parentLogDir):
+            mkdir(parentLogDir)
+            UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Creando Directorio de logs", False)
         if not isdir(logsDir):
             mkdir(logsDir)
             UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Creando Directorio de logs", False)
@@ -79,14 +83,11 @@ def Introduction():
 # Funcion para leer los datos del archivo de origen
 def ProcessInputFile(filePath, chunkLevel):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
-        sleep(pauseTime)
-
         fileContent = None
 
         # Lee el archivo con una barra de carga
         with ropen(filePath, "r", encoding="UTF-8", transient=False) as file:
             UpdateProgress(progress, None, 1, f"[yellow][READING] [green]Leyendo archivo [purple]{filePath}", True)
-            sleep(pauseTime)
             fileContent = file.read()
 
         actualTask = progress.add_task("[red]Procesando Contenido...", total=(len(fileContent)//chunkLevel))
@@ -104,8 +105,6 @@ def ProcessInputFile(filePath, chunkLevel):
 # Funcion para procesar la semilla del archivo que se usara
 def ProcessFileSeed(masterKey, chunkLevel):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
-        sleep(pauseTime)
-        
         actualTask = progress.add_task("[red]Generando Seed...", total=3)
 
         seed = randint(0, 64-chunkLevel) # La semilla del archivo
@@ -125,8 +124,6 @@ def ProcessFileSeed(masterKey, chunkLevel):
 # Encripta el archivo
 def CiperFile(content, seed, seededHashedMasterKey, chunkLevel):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
-        sleep(pauseTime)
-
         actualTask = progress.add_task("[red]Cifrando Archivo...", total=(len(content)*2))
 
         actualKey = seededHashedMasterKey
@@ -144,13 +141,13 @@ def CiperFile(content, seed, seededHashedMasterKey, chunkLevel):
 
             seg = ""
             for binC, binK in zip(binChunk, binKey):
-                char = chr((int(binC, 2) + int(binK, 2)))
+                char = chr(abs(int(binC, 2) + int(binK, 2)))
                 seg = seg + char
             result = result + seg
             segments.append(seg)
             UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando combinación [purple]{repr(seg)[1:-1]}", True)
 
-            actualKey = sha256(seg)[seed:seed+chunkLevel]
+            actualKey = sha256(chunk)[seed:seed+chunkLevel]
             UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando nueva llave [purple]{actualKey}", False)
 
     return result, segments
@@ -158,8 +155,6 @@ def CiperFile(content, seed, seededHashedMasterKey, chunkLevel):
 # Crea el checksum para la integridad del archivo
 def GenerateChecksum(segments):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
-        sleep(pauseTime)
-        
         actualTask = progress.add_task("[red]Calculando Checksum...", total=(len(segments)+1))
         
         shaSeg = ""
@@ -176,8 +171,6 @@ def GenerateChecksum(segments):
 # Crea el archivo de destino donde se guarda el texto cifrado
 def MakeFile(seed, content, checksum, dstPath):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
-        sleep(pauseTime)
-
         actualTask = progress.add_task("[red]Guardando Archivo...", total=1)
 
         with open(dstPath, "w+", encoding="UTF-8") as file:
@@ -194,7 +187,6 @@ if __name__ == "__main__":
     start = time()
 
     # Configuration Variables
-    pauseTime = 0.5
     verbose = True if Prompt.ask("Quieres activar verbose?", choices=["s", "n"]) == "s" else False
 
     Introduction()
