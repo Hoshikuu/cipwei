@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     # Configuration Variables
     pauseTime = 0.5
-    verbose = False
+    verbose = True if Prompt.ask("Quieres activar verbose?", choices=["s", "n"]) == "s" else False
 
     Introduction()
 

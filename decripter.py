@@ -70,20 +70,20 @@ def Introduction():
         UpdateProgress(progress, actualTask, 1, "[yellow][INIT] [green]Terminando", True)
 
 def ReadFile(filePath, chunkLevel):
-        with ropen(filePath, "r", encoding="UTF-8") as file:
-            fileContent = file.read()
+    with ropen(filePath, "r", encoding="UTF-8") as file:
+        fileContent = file.read()
 
-            hashedSeed = fileContent[:64]
-            checksum = fileContent[-64:]
+        hashedSeed = fileContent[:64]
+        checksum = fileContent[-64:]
 
-            content = fileContent[64:-64]
+        content = fileContent[64:-64]
 
-            processedContent = []
+        processedContent = []
 
-            for i in range(0, len(content), chunkLevel):
-                processedContent.append(content[i:i+chunkLevel])
+        for i in range(0, len(content), chunkLevel):
+            processedContent.append(content[i:i+chunkLevel])
 
-        return processedContent, hashedSeed, checksum
+    return processedContent, hashedSeed, checksum
 
 def CheckChecksum(content, checksum):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
@@ -104,7 +104,7 @@ def CheckChecksum(content, checksum):
             print("           Error con la integridad del archivo, este archivo fue modificado!!")
             exit()
 
-def CalculateSeed(hashedSeed):
+def CalculateSeed(hashedSeed, masterKey, chunkLevel):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         actualTask = progress.add_task("[red]Calculando Seed...", total=64)
 
@@ -115,7 +115,50 @@ def CalculateSeed(hashedSeed):
                 seed = i
                 UpdateProgress(progress, actualTask, 64 - i, f"[yellow][SEED] [green]Seed Calculado [purple]{seed}", True)
                 break
-        return seed
+
+        hashedMasterkey = sha256(masterKey)
+
+        seededHashedMasterKey = hashedMasterkey[seed:seed+chunkLevel]
+        return seed, seededHashedMasterKey
+
+def DecriptFile(content, seed, chunkLevel, seededHashedMasterKey):
+    with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
+        actualTask = progress.add_task("[red]Desencriptando Archivo...", total=(len(content)*2))
+
+        actualKey = seededHashedMasterKey
+
+        result = ""
+
+        for chunk in content:
+            binChunk = []
+            for char in chunk:
+                binChunk.append(format(ord(char), "08b"))
+            binKey = []
+            for char in actualKey:
+                binKey.append(format(ord(char), "08b"))
+
+            seg = ""
+            for binC, binK in zip(binChunk, binKey):
+                char = chr((int(binC, 2) - int(binK, 2)))
+                seg = seg + char
+            result = result + seg
+            UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Desencriptando segment [purple]{repr(seg)[1:-1]}", False)
+
+            actualKey = sha256(chunk)[seed:seed+chunkLevel]
+            UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando nueva llave [purple]{actualKey}", True)
+        return result
+    
+def MakeFile(content, dstPath):
+    with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
+        sleep(pauseTime)
+
+        actualTask = progress.add_task("[red]Guardando Archivo...", total=1)
+
+        with open(dstPath, "w+", encoding="UTF-8") as file:
+            file.write(content)
+        
+        UpdateProgress(progress, actualTask, 1, f"[yellow][MAKE] [green]Guardando archivo Desencriptado [purple]{dstPath}", True)
+    return None
 
 if __name__ == "__main__":
     
@@ -126,22 +169,25 @@ if __name__ == "__main__":
 
     # Configuration Variables
     pauseTime = 0.5
-    verbose = True
+    verbose = True if Prompt.ask("Quieres activar verbose?", choices=["s", "n"]) == "s" else False
 
-     # Settings Variables
-    # fileName = Prompt.ask("Introduce la ruta del archivo que quieres encriptar")
-    fileName = "test.wei"
+    # Settings Variables
+    fileName = Prompt.ask("Introduce la ruta del archivo que quieres encriptar")
+    # fileName = "test.wei"
+    dstPath = fileName.split(".")[0] + "Decripted.txt"
 
-    # while True:
-    #     chunkLevel = IntPrompt.ask("Introduce la cantitdad de bytes que se usara por chunk [1 - 64]",default=16)
-    #     if chunkLevel >= 1 and chunkLevel <= 64:
-    #         break
-    #     print("Cantidad introducida no entra al rango de seguridad permitida de momento")
+    while True:
+        chunkLevel = IntPrompt.ask("Introduce la cantitdad de bytes que se usara por chunk [1 - 64]",default=16)
+        if chunkLevel >= 1 and chunkLevel <= 64:
+            break
+        print("Cantidad introducida no entra al rango de seguridad permitida de momento")
 
-    chunkLevel = 16
+    # chunkLevel = 16
 
-    # masterKey = getpass("Introduce la clave de cifrado: ")
-    masterKey = "secret"
+    masterKey = getpass("Introduce la clave de cifrado: ")
+    # masterKey = "secret"
+
+    # Start
 
     Introduction()
 
@@ -149,32 +195,8 @@ if __name__ == "__main__":
 
     CheckChecksum(processedContent, checksum)
 
-    seed = CalculateSeed(hashedSeed)
+    seed, seededHashedMasterKey = CalculateSeed(hashedSeed, masterKey, chunkLevel)
 
+    result = DecriptFile(processedContent, seed, chunkLevel, seededHashedMasterKey)
 
-
-
-# with ropen("test.wei", "r", encoding="UTF-8") as file:
-#     fileContent = file.read()
-#     content = fileContent[64:-64]
-#     print(content)
-#     for i in range(0, len(content), chunkLevel):
-#         processedContent.append(content[i:i+chunkLevel])
-#     print(processedContent)
-
-#     sha256Content = ""
-
-#     for seg in processedContent:
-#         sha256Content = sha256Content + sha256(seg)
-
-#     checksum = sha256(sha256Content)
-#     print(checksum)
-
-#     print(fileContent[-64:])
-    
-#     for i in range(64):
-#         seed = sha256(i)
-#         print(seed)
-#         if seed == fileContent[:64]:
-#             print(i)
-#             break
+    MakeFile(result, dstPath)
