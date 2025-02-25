@@ -1,2 +1,109 @@
 import tkinter as tk
+from tkinter import filedialog
 
+class Aplication:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Herramienta")
+        self.root.geometry("600x400")
+        self.allLogs = []
+
+        self.BarraHerramientas()
+
+    def BarraHerramientas(self):
+        barraHerramientas = tk.Menu(self.root)
+
+        menuHerramientas = tk.Menu(barraHerramientas, tearoff=0)
+        menuHerramientas.add_command(label="Cifrar", command=self.pestanaCifrado)
+        menuHerramientas.add_command(label="Descifrar", command=self.pestanaDescifrado)
+        
+        barraHerramientas.add_cascade(label="Herramientas", menu=menuHerramientas)
+
+        self.root.config(menu=barraHerramientas)
+
+    def pestanaCifrado(self):
+        self.limpiarVentana()
+
+        titulo = tk.Label(self.root, text="Cifrar Archivo", font=("Arial", 16))
+        titulo.pack(pady=10)
+
+        frame = tk.Frame(self.root)
+        frame.pack(pady=20, padx=20)
+
+        self.entradaArchivo = tk.Entry(frame, font=("Arial", 10), width=50)
+        self.entradaArchivo.pack(side=tk.LEFT, padx=10)
+
+        botonArchivo = tk.Button(
+            frame, text="Seleccionar Archivo", command=self.seleccionarArchivo,
+            bg="#0078D7", fg="white", font=("Arial", 12), padx=10, pady=5, relief=tk.GROOVE
+        )
+        botonArchivo.pack(side=tk.LEFT, padx=10)
+
+        botonCifrar = tk.Button(
+            self.root, text="Cifrar archivo", command=self.cifrarArchivo,
+            bg="#28A745", fg="white", font=("Arial", 12), padx=10, pady=5, relief=tk.GROOVE
+        )
+        botonCifrar.pack(pady=10)
+
+        self.log = tk.Text(self.root, height=10, width=70, font=("Arial", 10), state=tk.DISABLED)
+        self.log.pack(pady=10)
+
+    def pestanaDescifrado(self):
+        self.limpiarVentana()
+
+        titulo = tk.Label(self.root, text="Descifrar Archivo", font=("Arial", 16))
+        titulo.pack(pady=10)
+
+        frame = tk.Frame(self.root)
+        frame.pack(pady=20, padx=20)
+
+        self.entrada_archivo = tk.Entry(frame, font=("Arial", 10), width=50)
+        self.entrada_archivo.pack(side=tk.LEFT, padx=10)
+
+        boton_archivo = tk.Button(
+            frame, text="Seleccionar Archivo", command=self.seleccionarArchivo,
+            bg="#0078D7", fg="white", font=("Arial", 12), padx=10, pady=5, relief=tk.GROOVE
+        )
+        boton_archivo.pack(side=tk.LEFT, padx=10)
+
+        boton_descifrar = tk.Button(
+            self.root, text="Descifrar archivo", command=self.descifrarArchivo,
+            bg="#FFC107", fg="black", font=("Arial", 12), padx=10, pady=5, relief=tk.GROOVE
+        )
+        boton_descifrar.pack(pady=10)
+
+        self.log = tk.Text(self.root, height=10, width=70, font=("Arial", 10), state=tk.DISABLED)
+        self.log.pack(pady=10)
+
+    def limpiarVentana(self):
+        for widget in self.root.winfo_children():
+            if widget != self.root.children.get("!menu"):
+                widget.destroy()
+
+    def seleccionarArchivo(self):
+        archivo = filedialog.askopenfilename()
+        self.entradaArchivo.delete(0, tk.END)
+        self.entradaArchivo.insert(0, archivo if archivo else "No se seleccionó ningún archivo")
+        self.anadirLog(f"Archivo seleccionado: {archivo}")
+
+    def anadirLog(self, log):
+        self.log.config(state=tk.NORMAL)
+
+        self.allLogs.append(log)
+
+        self.log.insert(tk.END, log + "\n")
+        self.log.see(tk.END)
+        
+        self.log.config(state=tk.DISABLED)
+
+    def cifrarArchivo(self):
+        self.anadirLog("Hola")
+        
+    def descifrarArchivo(self):
+        self.anadirLog("adios")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = Aplication(root)
+    root.mainloop()
