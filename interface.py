@@ -99,7 +99,11 @@ class Aplication:
         self.log.config(state=tk.DISABLED)
 
     def cifrarArchivo(self):
-        Datos(self.root)
+        datos = Datos(self.root)
+        root.wait_window(datos.ventanaDatos)
+        chunkLevel = datos.chunkLevel
+        masterKey = datos.masterKey
+    
         
     def descifrarArchivo(self):
         self.anadirLog("adios")
@@ -113,23 +117,37 @@ class Datos:
         self.Informacion()
         self.Cerrar()
 
+    @property
+    def chunkLevel(self):
+        return self._chunkLevel
+
+    @property
+    def masterKey(self):
+        return self._masterKey
+
     def Informacion(self):
         frameBytes = tk.Frame(self.ventanaDatos)
         frameBytes.pack(pady=20, padx=20)
         bytes = tk.Label(frameBytes, text="Numero de Bytes:", font=("Arial", 12))
         bytes.pack(side=tk.LEFT, padx=10)
-        bytesEntrada = tk.Entry(frameBytes, font=("Arial", 12), width=20)
-        bytesEntrada.pack(side=tk.RIGHT, padx=10)
+        self.bytesEntrada = tk.Entry(frameBytes, font=("Arial", 12), width=20)
+        self.bytesEntrada.pack(side=tk.RIGHT, padx=10)
 
         framePasswd = tk.Frame(self.ventanaDatos)
         framePasswd.pack(pady=20, padx=20)
         passwd = tk.Label(framePasswd, text="Clave:", font=("Arial", 12))
         passwd.pack(side=tk.LEFT, padx=10)
-        passwdEntrada = tk.Entry(framePasswd, font=("Arial", 12), width=20)
-        passwdEntrada.pack(side=tk.RIGHT, padx=10)
+        self.passwdEntrada = tk.Entry(framePasswd, font=("Arial", 12), width=20)
+        self.passwdEntrada.pack(side=tk.RIGHT, padx=10)
+
+    def Update(self):
+        self._chunkLevel = self.bytesEntrada.get()  
+        self._masterKey = self.passwdEntrada.get()
+        self.ventanaDatos.destroy()
 
     def Cerrar(self):
-        self.botonAceptar = tk.Button(self.ventanaDatos, text="Aceptar", command=self.ventanaDatos.destroy)
+        # self.botonAceptar = tk.Button(self.ventanaDatos, text="Aceptar", command=self.GetterDatos)
+        self.botonAceptar = tk.Button(self.ventanaDatos, text="Aceptar", command=self.Update)
         self.botonAceptar.pack(pady=20)
 
 if __name__ == "__main__":
