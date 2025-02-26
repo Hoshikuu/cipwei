@@ -10,6 +10,8 @@ class Aplication:
 
         self.BarraHerramientas()
 
+        self.pestanaCifrado()
+
     def BarraHerramientas(self):
         barraHerramientas = tk.Menu(self.root)
 
@@ -57,8 +59,8 @@ class Aplication:
         frame = tk.Frame(self.root)
         frame.pack(pady=20, padx=20)
 
-        self.entrada_archivo = tk.Entry(frame, font=("Arial", 10), width=50)
-        self.entrada_archivo.pack(side=tk.LEFT, padx=10)
+        self.entradaArchivo = tk.Entry(frame, font=("Arial", 10), width=50)
+        self.entradaArchivo.pack(side=tk.LEFT, padx=10)
 
         boton_archivo = tk.Button(
             frame, text="Seleccionar Archivo", command=self.seleccionarArchivo,
@@ -97,11 +99,38 @@ class Aplication:
         self.log.config(state=tk.DISABLED)
 
     def cifrarArchivo(self):
-        self.anadirLog("Hola")
+        Datos(self.root)
         
     def descifrarArchivo(self):
         self.anadirLog("adios")
 
+class Datos:
+    def __init__(self, root):
+        self.ventanaDatos = tk.Toplevel(root)
+        self.ventanaDatos.title("Herramienta de Cifrado/Descifrado")
+        self.ventanaDatos.geometry("600x400")
+
+        self.Informacion()
+        self.Cerrar()
+
+    def Informacion(self):
+        frameBytes = tk.Frame(self.ventanaDatos)
+        frameBytes.pack(pady=20, padx=20)
+        bytes = tk.Label(frameBytes, text="Numero de Bytes:", font=("Arial", 12))
+        bytes.pack(side=tk.LEFT, padx=10)
+        bytesEntrada = tk.Entry(frameBytes, font=("Arial", 12), width=20)
+        bytesEntrada.pack(side=tk.RIGHT, padx=10)
+
+        framePasswd = tk.Frame(self.ventanaDatos)
+        framePasswd.pack(pady=20, padx=20)
+        passwd = tk.Label(framePasswd, text="Clave:", font=("Arial", 12))
+        passwd.pack(side=tk.LEFT, padx=10)
+        passwdEntrada = tk.Entry(framePasswd, font=("Arial", 12), width=20)
+        passwdEntrada.pack(side=tk.RIGHT, padx=10)
+
+    def Cerrar(self):
+        self.botonAceptar = tk.Button(self.ventanaDatos, text="Aceptar", command=self.ventanaDatos.destroy)
+        self.botonAceptar.pack(pady=20)
 
 if __name__ == "__main__":
     root = tk.Tk()
