@@ -83,10 +83,10 @@ class Aplication:
                 widget.destroy()
 
     def seleccionarArchivo(self):
-        archivo = filedialog.askopenfilename()
+        self.selectedFile = filedialog.askopenfilename()
         self.entradaArchivo.delete(0, tk.END)
-        self.entradaArchivo.insert(0, archivo if archivo else "No se seleccionó ningún archivo")
-        self.anadirLog(f"Archivo seleccionado: {archivo}")
+        self.entradaArchivo.insert(0, self.selectedFile if self.selectedFile else "No se seleccionó ningún archivo")
+        self.anadirLog(f"Archivo seleccionado: {self.selectedFile}")
 
     def anadirLog(self, log):
         self.log.config(state=tk.NORMAL)
@@ -103,6 +103,10 @@ class Aplication:
         root.wait_window(datos.ventanaDatos)
         chunkLevel = datos.chunkLevel
         masterKey = datos.masterKey
+
+        with open(self.selectedFile, "r", "UTF-8") as f:
+            pass
+        #open all the things for encrypting this file
     
         
     def descifrarArchivo(self):

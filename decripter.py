@@ -5,14 +5,13 @@
 #
 #                                                                    ---------------------------------
 
-from time import sleep, time
+from time import time
 from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
 from rich.progress import Progress, BarColumn, TextColumn, open as ropen
-from os import mkdir, rename, name
+from os import mkdir, rename
 from os.path import isdir, getmtime, isfile
 from hashlib import sha3_256
-from random import randint
 from datetime import datetime
 from re import sub
 from getpass import getpass

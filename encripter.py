@@ -5,7 +5,7 @@
 #
 #                                                                    ---------------------------------
 
-from time import sleep, time
+from time import time
 from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
 from rich.progress import Progress, BarColumn, TextColumn, open as ropen
