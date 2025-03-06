@@ -1,14 +1,29 @@
+#                                                                    ---------------------------------
+#
+#                                                                       Script  creado por  Hoshiku
+#                                                                       https://github.com/Hoshikuu
+#
+#                                                                    ---------------------------------
+
 import tkinter
 import tkinter.filedialog
 from random import randint
 from os.path import isfile
+from os import chdir
+import sys
 from hashlib import sha3_256
+import cipweiCore
+import cipweiEncripter
+import cipweiDecripter
 
 # Interfaz principal
 class Aplication:
     def __init__(self, root):
         self.root = root
-        self.root.title("Herramienta")
+        self.root.title("cipweiTool")
+        if hasattr(sys, '_MEIPASS'):
+            chdir(sys._MEIPASS)
+        root.iconbitmap("resources/cipwei.ico")
         self.root.geometry("800x600") # Tamaño de la pantalla
         self.allLogs = [] # Donde se guardan todos los logs que genera el programa para posteriormente guardarlos en un archivo todo
 
@@ -169,7 +184,7 @@ class Aplication:
                 # UpdateLog(f"[CRYPT] Encriptando {repr(seg)[1:-1]}") # Alternative
                 UpdateLog(f"[CRYPT] Encriptando {seg}")
 
-                actualKey = sha256(chunk)[seed:seed+chunkLevel]
+                actualKey = sha256(chunk+seg)[seed:seed+chunkLevel]
                 # UpdateLog(f"[CRYPT] Calculando nueva llave {actualKey}")
 
             return result, segments
@@ -292,7 +307,7 @@ class Aplication:
                     seg = seg + char
                 result = result + seg
                 UpdateLog(f"[CRYPT] Desencriptando segment {repr(seg)[1:-1]}")
-                actualKey = sha256(seg)[seed:seed+chunkLevel]
+                actualKey = sha256(seg+chunk)[seed:seed+chunkLevel]
                 # UpdateLog(f"[yellow][CRYPT] [green]Calculando nueva llave {actualKey}")
             return result
         
@@ -330,7 +345,8 @@ class Aplication:
 class Datos:
     def __init__(self, root):
         self.ventanaDatos = tkinter.Toplevel(root)
-        self.ventanaDatos.title("Herramienta de Cifrado/Descifrado")
+        self.ventanaDatos.title("cipweiTool - Data")
+        root.iconbitmap("resources/cipwei.ico")
         self.ventanaDatos.geometry("500x200")
 
         self.Informacion()

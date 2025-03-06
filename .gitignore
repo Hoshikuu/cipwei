@@ -1,6 +1,3 @@
 # Local Test Things
 .venv
-*.txt
-*.wei
-Logs/
-output/
+*.exe

@@ -158,7 +158,7 @@ def DecriptFile(content, seed, chunkLevel, seededHashedMasterKey):
                 seg = seg + char
             result = result + seg
             UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Desencriptando segment [purple]{repr(seg)[1:-1]}", False)
-            actualKey = sha256(seg)[seed:seed+chunkLevel]
+            actualKey = sha256(seg+chunk)[seed:seed+chunkLevel]
             UpdateProgress(progress, actualTask, 1, f"[yellow][CRYPT] [green]Calculando nueva llave [purple]{actualKey}", True)
         return result
 
