@@ -17,6 +17,7 @@ from datetime import datetime
 from re import sub
 from getpass import getpass
 from pathlib import Path
+from weicore.coder import encodeb64
 
 # Funcion para actualizar la barra uso Global
 def UpdateProgress(progress, task, step, log, logIt):
@@ -86,9 +87,9 @@ def ProcessInputFile(filePath, chunkLevel):
         fileContent = None
 
         # Lee el archivo con una barra de carga
-        with ropen(filePath, "r", encoding="UTF-8", transient=False) as file:
+        with ropen(filePath, "rb", transient=False) as file:
             UpdateProgress(progress, None, 1, f"[yellow][READING] [green]Leyendo archivo [purple]{filePath}", True)
-            fileContent = file.read()
+            fileContent = encodeb64(file.read())
 
         actualTask = progress.add_task("[red]Procesando Contenido...", total=(len(fileContent)//chunkLevel))
 
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     
     # dstPath = Prompt.ask("Introduce el archivo de destino")
     # dstPath = "Cifradowei.wei"
-    dstPath = fileName.split(".")[0] + ".wei"
+    dstPath = fileName + ".wei"
 
     # Start
     content = ProcessInputFile(fileName, chunkLevel)

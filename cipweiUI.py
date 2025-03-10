@@ -12,6 +12,7 @@ from os.path import isfile
 from os import chdir
 import sys
 from hashlib import sha3_256
+from weicore.coder import encodeb64, decodeb64
 import cipweiCore
 import cipweiEncripter
 import cipweiDecripter
@@ -139,8 +140,8 @@ class Aplication:
 
         def ProcessInputFile(filePath, chunkLevel):
             processedContent = []
-            with open(filePath, "r", encoding="UTF-8") as file:
-                fileContent = file.read()
+            with open(filePath, "rb") as file:
+                fileContent = encodeb64(file.read())
                 for i in range(0, len(fileContent), chunkLevel):
                     processedContent.append(fileContent[i:i+chunkLevel])
                     UpdateLog(f"[CHUNKS] Procesando chunk {i//chunkLevel+1}")
@@ -218,7 +219,7 @@ class Aplication:
         chunkLevel = int(datos.chunkLevel)
         masterKey = datos.masterKey
 
-        dstPath = filePath.split(".")[0] + ".wei"
+        dstPath = filePath + ".wei"
 
         content = ProcessInputFile(filePath, chunkLevel)
 
@@ -312,8 +313,8 @@ class Aplication:
             return result
         
         def MakeFile(content, dstPath):
-            with open(dstPath, "w+", encoding="UTF-8") as file:
-                file.write(content)
+            with open(dstPath, "wb") as file:
+                file.write(decodeb64(content))
             
             UpdateLog(f"[MAKE] Guardando archivo Desencriptado {dstPath}")
             return None
@@ -323,7 +324,7 @@ class Aplication:
             UpdateLog("[INIT] No has seleccionado ningun archivo")
             return None
 
-        dstPath = filePath.split(".")[0] + "Decripted.txt"
+        dstPath = filePath.replace(".wei", "")
 
         datos = Datos(self.root)
         root.wait_window(datos.ventanaDatos)

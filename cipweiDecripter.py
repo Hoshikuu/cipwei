@@ -16,6 +16,7 @@ from datetime import datetime
 from re import sub
 from getpass import getpass
 from pathlib import Path
+from weicore.coder import decodeb64
 
 # Devuelve la cadena de texto en sha3-256 Doble
 def sha256(text):
@@ -167,8 +168,8 @@ def MakeFile(content, dstPath):
     with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("{task.percentage:>3.0f}%"), console=console, transient=False) as progress:
         actualTask = progress.add_task("[red]Guardando Archivo...", total=1)
 
-        with open(dstPath, "w+", encoding="UTF-8") as file:
-            file.write(content)
+        with open(dstPath, "wb") as file:
+            file.write(decodeb64(content))
         
         UpdateProgress(progress, actualTask, 1, f"[yellow][MAKE] [green]Guardando archivo Desencriptado [purple]{dstPath}", True)
     return None
@@ -191,7 +192,7 @@ if __name__ == "__main__":
 
     # dstPath = Prompt.ask("Introduce el archivo de destino")
     # dstPath = "Cifradowei.wei"
-    dstPath = fileName.split(".")[0] + "Decripted.txt"
+    dstPath = fileName.replace(".wei", "")
 
     # chunkLevel = 16
     while True:
