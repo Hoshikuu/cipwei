@@ -8,6 +8,7 @@ The project consists of four Python files and an executable:
 - **`cipweiEncripter`**: This is the encryption module. It provides a user-friendly terminal interface (TTY) for encrypting files. It essentially performs the same function as the encryption feature in `cipweiCore`, but with a more polished UI.
 - **`cipweiDecripter`**: This module is used for decrypting files. Like the encrypter, it operates in the terminal and offers a more user-friendly interface compared to the core decryption function.
 - **`cipweiUI`**: This file has been compiled into an executable, so you should use the executable instead of running this Python file directly.
+- **`[V2] cipwei`**: Updated and upgrades encryptation method by using asymmetric encryptation, do not use this unless if needed.
 
 ## Disclaimer:
 **Do not use this tool for sensitive information such as passwords or secret messages. It may not be secure enough for such purposes.**

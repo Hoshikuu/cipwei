@@ -185,7 +185,7 @@ class Aplication:
                 # UpdateLog(f"[CRYPT] Encriptando {repr(seg)[1:-1]}") # Alternative
                 UpdateLog(f"[CRYPT] Encriptando {seg}")
 
-                actualKey = sha256(chunk+seg)[seed:seed+chunkLevel]
+                # actualKey = sha256(chunk+seg)[seed:seed+chunkLevel]
                 # UpdateLog(f"[CRYPT] Calculando nueva llave {actualKey}")
 
             return result, segments
@@ -308,7 +308,7 @@ class Aplication:
                     seg = seg + char
                 result = result + seg
                 UpdateLog(f"[CRYPT] Desencriptando segment {repr(seg)[1:-1]}")
-                actualKey = sha256(seg+chunk)[seed:seed+chunkLevel]
+                # actualKey = sha256(seg+chunk)[seed:seed+chunkLevel]
                 # UpdateLog(f"[yellow][CRYPT] [green]Calculando nueva llave {actualKey}")
             return result
         
