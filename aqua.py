@@ -76,7 +76,7 @@ def create_chunks(data, randomness):
         chunk += fill
         yield chunk, i // size
         
-def remove_chunks(data, randomness):
+def remove_chunks(data):
     """Remove random characters from data chunks.
 
     Args:
@@ -87,17 +87,13 @@ def remove_chunks(data, randomness):
     """
     # randomness = 50 # 0 - 100 percent of randomness (set to 0 for no randomness)
     size = int(128 * (100 - randomness) / 100)
-
-    for i in range(0, len(data), 128):
-        chunk = data[i:i+128]
-        real_chunk = chunk[:-(128-size)]   # nos quedamos solo con la parte real
-        yield real_chunk
+    chunk = data[:128-size]
+    return chunk
 
 def create_shuffled_data(data, pattern, randomness):
     #TODO: Write DOCSTRING
     _chunk = ""
     for chunk, i in create_chunks(data, randomness):
-        print(f"Chunk {i}: {chunk} (len={len(chunk)})")
         shuffled_data = []
         # print(_pattern) # ESTO ROMPE LA PUTA TERMINAL QUE COJONES
         if i == 0 or (i % 3) == 0:
@@ -129,9 +125,33 @@ def create_unshuffled_data(data, pattern):
             for char in rev_pattern:
                 unshuffled_data.append(chunk[ord(char)])
         _chunk = "".join(unshuffled_data)
-        yield _chunk
+        yield remove_chunks(_chunk)
 
-#TODO: Implement decryption (unshuffling)
+
+
+#Separar en chunks primero la informacion, despues de la clave, convertirla en la cantidad de bytes en los chunks
+#Despues, sumar la clave resultante de los chunks a los datos
+
+#Se podra usar hilos para mejorar la eficiencia, que separe los chunks en diferentes hilos ninguno sin repetir, por ejemplo
+#en el hilo 1 este el chunk de 0 al 7 en el hilo 2 este el chunk del 8 al 16
+
+def encryptation(data, key):
+    pattern = create_pattern(create_byte_key(key))
+    for chunk in create_shuffled_data(data, pattern, randomness):
+        _chunk = []
+        for charC, charP in zip(chunk, pattern):
+            _chunk.append(chr(ord(charC) + ord(charP)))
+        yield "".join(_chunk)
+
+def decryptation(data, key):
+    pattern = create_pattern(create_byte_key(key))
+    _chunk = []
+    for i in range(0, len(data), 128):
+        chunk = data[i:i+128]
+        for charC, charP in zip(chunk, pattern):
+            _chunk.append(chr(ord(charC) - ord(charP)))
+    
+    return create_unshuffled_data("".join(_chunk), pattern)
 
 #TODO: Add another layer of encryption (CIPWEI CORE) + decryption
 
@@ -139,18 +159,26 @@ def create_unshuffled_data(data, pattern):
 password = "password"
 randomness = 50  # 0 - 100 percent of randomness (set to 0 for no randomness)
 
-pattern = create_pattern(create_byte_key(password))
-
 data = "This is a test message for encryption and decryption. Let's see how it works! 1234567890!@#$%^&*()_+-=[]{}|;:',.<>/?`~ \"\\ End of message. " * 5  # Make it longer
 
-s_data = "".join(list(create_shuffled_data(data, pattern, randomness)))
-print("DATA:", s_data)
-with open("aqua.shuffled.data", "w+", encoding="UTF-8") as file:
-    file.write(s_data)
+# TODO: Habra algun modo de generar directamente el contenido encriptado, cuando se van llamando los chunks
+# s_data = "".join(list(create_shuffled_data(data, pattern, randomness)))
+# print("DATA:", s_data)
+#with open("aqua.shuffled.data", "w+", encoding="UTF-8") as file:
+#    file.write(s_data)
 
-us_data = "".join(list(remove_chunks("".join(list(create_unshuffled_data(s_data, pattern))), randomness)))
-print("DATA:", us_data)
+# TODO: Lo mismo para esto, se podra ir desencriptando a lo que se tarda en llamar el chunk
+#us_data = "".join(list(remove_chunks("".join(list(create_unshuffled_data(s_data, pattern))), randomness)))
+#print("DATA:", us_data)
 
+en_data = "".join(list(encryptation(data, password)))
+
+with open("aqua.encrypted.data", "w+", encoding="utf-8") as f:
+    f.write(f"aqua.{randomness}." + en_data)    
+
+
+with open("aqua.decrypted.data", "w+", encoding="utf-8") as f:
+    f.write("".join(list(decryptation(en_data, password))))
 # from cipweiV2 import encriptA, decriptB
 
 # A = encriptA(s_data, 16, password)
